@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  coffee-sam
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  GetShopsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/get-shops/
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref DynamoCoffeeShopsTable
+      Policies:
+        DynamoDBReadPolicy:
+          TableName: !Ref DynamoCoffeeShopsTable
+      Events:
+        GetShops:
+          Type: Api
+          Properties:
+            Path: /shops
+            Method: get
+
+  PostShopFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/post-shop/
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref DynamoCoffeeShopsTable
+      Policies:
+        DynamoDBCrudPolicy:
+          TableName: !Ref DynamoCoffeeShopsTable
+      Events:
+        GetShops:
+          Type: Api
+          Properties:
+            Path: /shops
+            Method: post
+
+  DynamoCoffeeShopsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: coffee-table
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  ShopsApi:
+    Description: 'API Gateway endpoint URL for Prod stage for Shops function'
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/shops/'
+  GetShopsFunction:
+    Description: 'Lambda function to get shops'
+    Value: !GetAtt GetShopsFunction.Arn
+  GetShopsFunctionIamRole:
+    Description: 'Implicit IAM Role created for GetShops function'
+    Value: !GetAtt GetShopsFunction.Arn
+  PostShopFunction:
+    Description: 'Lambda function to post a new shop'
+    Value: !GetAtt PostShopFunction.Arn
+  PostShopFunctionIamRole:
+    Description: 'Implicit IAM Role created for PostShop function'
+    Value: !GetAtt PostShopFunction.Arn

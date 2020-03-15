@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'coffee-sam
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+Resources:
+  GetShopsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: GetShopsFunction
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Ref: DynamoCoffeeShopsTable
+      Policies:
+        DynamoDBReadPolicy:
+          TableName:
+            Ref: DynamoCoffeeShopsTable
+      Events:
+        GetShops:
+          Type: Api
+          Properties:
+            Path: /shops
+            Method: get
+  PostShopFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: PostShopFunction
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Ref: DynamoCoffeeShopsTable
+      Policies:
+        DynamoDBCrudPolicy:
+          TableName:
+            Ref: DynamoCoffeeShopsTable
+      Events:
+        GetShops:
+          Type: Api
+          Properties:
+            Path: /shops
+            Method: post
+  DynamoCoffeeShopsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: coffee-table
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+Outputs:
+  ShopsApi:
+    Description: API Gateway endpoint URL for Prod stage for Shops function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/shops/
+  GetShopsFunction:
+    Description: Lambda function to get shops
+    Value:
+      Fn::GetAtt:
+        - GetShopsFunction
+        - Arn
+  GetShopsFunctionIamRole:
+    Description: Implicit IAM Role created for GetShops function
+    Value:
+      Fn::GetAtt:
+        - GetShopsFunction
+        - Arn
+  PostShopFunction:
+    Description: Lambda function to post a new shop
+    Value:
+      Fn::GetAtt:
+        - PostShopFunction
+        - Arn
+  PostShopFunctionIamRole:
+    Description: Implicit IAM Role created for PostShop function
+    Value:
+      Fn::GetAtt:
+        - PostShopFunction
+        - Arn
