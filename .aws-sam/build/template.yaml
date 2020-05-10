@@ -47,6 +47,23 @@ Resources:
           Properties:
             Path: /shops
             Method: post
+  TriggerDeployFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: TriggerDeployFunction
+      Handler: app.handler
+      Runtime: nodejs12.x
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: TriggerDeploySNS
+      TopicName: TriggerDeployTopic
+      Subscription:
+        - Endpoint:
+            Fn::GetAtt:
+              - TriggerDeployFunction
+              - Arn
+          Protocol: lambda
   DynamoCoffeeShopsTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
@@ -54,32 +71,28 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-Outputs:
-  ShopsApi:
-    Description: API Gateway endpoint URL for Prod stage for Shops function
-    Value:
-      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/shops/
-  GetShopsFunction:
-    Description: Lambda function to get shops
-    Value:
-      Fn::GetAtt:
-        - GetShopsFunction
-        - Arn
-  GetShopsFunctionIamRole:
-    Description: Implicit IAM Role created for GetShops function
-    Value:
-      Fn::GetAtt:
-        - GetShopsFunction
-        - Arn
-  PostShopFunction:
-    Description: Lambda function to post a new shop
-    Value:
-      Fn::GetAtt:
-        - PostShopFunction
-        - Arn
-  PostShopFunctionIamRole:
-    Description: Implicit IAM Role created for PostShop function
-    Value:
-      Fn::GetAtt:
-        - PostShopFunction
-        - Arn
+  TriggerDeployInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: TriggerDeployFunction
+      Principal: sns.amazonaws.com
+  TriggerDeployTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - Ref: SNSTopic
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: sns:Publish
+            Resource:
+              Ref: SNSTopic
+            Principal:
+              AWS: '*'
+            Condition:
+              ArnEquals:
+                AWS:SourceArn:
+                  Ref: PostShopFunction
