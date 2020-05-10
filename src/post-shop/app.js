@@ -5,10 +5,15 @@ const processResponse = require('./process-response');
 
 const TableName = process.env.TABLE_NAME;
 const snsArn = process.env.SNS_TOPIC_ARN;
+const authorizationParam = process.env.AUTHORIZATION;
 
 exports.handler = async event => {
   try {
-    const { name, location, rating, shouldTriggerDeploy } = event.body;
+    const { name, location, rating, shouldTriggerDeploy, authorization } = event.body;
+
+    if (!authorization || authorization !== authorizationParam) {
+      return processResponse(401, 'Not authorized');
+    }
 
     const params = {
       Item: {
