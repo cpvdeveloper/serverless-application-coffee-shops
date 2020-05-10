@@ -37,6 +37,8 @@ Resources:
         Variables:
           TABLE_NAME:
             Ref: DynamoCoffeeShopsTable
+          SNS_TOPIC_ARN:
+            Ref: TriggerDeploySNS
       Policies:
         DynamoDBCrudPolicy:
           TableName:
@@ -53,11 +55,9 @@ Resources:
       CodeUri: TriggerDeployFunction
       Handler: app.handler
       Runtime: nodejs12.x
-  SNSTopic:
+  TriggerDeploySNS:
     Type: AWS::SNS::Topic
     Properties:
-      DisplayName: TriggerDeploySNS
-      TopicName: TriggerDeployTopic
       Subscription:
         - Endpoint:
             Fn::GetAtt:
@@ -82,14 +82,14 @@ Resources:
     Type: AWS::SNS::TopicPolicy
     Properties:
       Topics:
-        - Ref: SNSTopic
+        - Ref: TriggerDeploySNS
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Action: sns:Publish
             Resource:
-              Ref: SNSTopic
+              Ref: TriggerDeploySNS
             Principal:
               AWS: '*'
             Condition:

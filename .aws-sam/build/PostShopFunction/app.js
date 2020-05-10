@@ -4,6 +4,7 @@ const uuid = require('uuid');
 const processResponse = require('./process-response');
 
 const TableName = process.env.TABLE_NAME;
+const snsArn = process.env.SNS_TOPIC_ARN;
 
 exports.handler = async event => {
   try {
@@ -25,7 +26,13 @@ exports.handler = async event => {
     let didTriggerDeploy = false;
     if (shouldTriggerDeploy) {
       try {
-        // await axios.post(`${process.env.NETLIFY_DEPLOY_URL}?trigger_title=add+shop+form`, {})
+        const Sns = AWS.SNS();
+        const params = {
+          Message: 'Deploy',
+          TopicArn: snsArn,
+        };
+
+        await Sns.publish(params).promise();
         didTriggerDeploy = true;
       } catch (err) {
         console.log('Error triggering deploy', err);
