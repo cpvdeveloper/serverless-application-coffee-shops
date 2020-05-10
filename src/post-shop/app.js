@@ -26,7 +26,7 @@ exports.handler = async event => {
     let didTriggerDeploy = false;
     if (shouldTriggerDeploy) {
       try {
-        const Sns = AWS.SNS();
+        const Sns = new AWS.SNS();
         const params = {
           Message: 'Deploy',
           TopicArn: snsArn,

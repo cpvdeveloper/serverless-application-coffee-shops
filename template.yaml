@@ -38,8 +38,10 @@ Resources:
           TABLE_NAME: !Ref DynamoCoffeeShopsTable
           SNS_TOPIC_ARN: !Ref TriggerDeploySNS
       Policies:
-        DynamoDBCrudPolicy:
-          TableName: !Ref DynamoCoffeeShopsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoCoffeeShopsTable
+        - SNSCrudPolicy:
+            TopicName: !GetAtt TriggerDeploySNS.TopicName
       Events:
         GetShops:
           Type: Api
@@ -77,20 +79,19 @@ Resources:
       Action: 'lambda:InvokeFunction'
       FunctionName: !Ref TriggerDeployFunction
       Principal: sns.amazonaws.com
-
-  TriggerDeployTopicPolicy:
-    Type: AWS::SNS::TopicPolicy
-    Properties:
-      Topics:
-        - !Ref TriggerDeploySNS
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Action: 'sns:Publish'
-            Resource: !Ref TriggerDeploySNS
-            Principal:
-              AWS: '*'
-            Condition:
-              ArnEquals:
-                AWS:SourceArn: !Ref PostShopFunction
+  # TriggerDeployTopicPolicy:
+  #   Type: AWS::SNS::TopicPolicy
+  #   Properties:
+  #     Topics:
+  #       - !Ref TriggerDeploySNS
+  #     PolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         - Effect: Allow
+  #           Action: 'sns:Publish'
+  #           Resource: !Ref TriggerDeploySNS
+  #           Principal:
+  #             AWS: '*'
+  #           Condition:
+  #             ArnLike:
+  #               AWS:SourceArn: !Sub 'arn:aws:*:*:${AWS::AccountId}:*'
