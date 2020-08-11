@@ -9,7 +9,7 @@ const authorizationParam = process.env.AUTHORIZATION;
 
 exports.handler = async event => {
   try {
-    const { name, location, rating, shouldTriggerDeploy, authorization } = event.body;
+    const { name, location, rating, shouldTriggerDeploy, authorization } = JSON.parse(event.body);
 
     if (!authorization || authorization !== authorizationParam) {
       return processResponse(401, 'Not authorized');
