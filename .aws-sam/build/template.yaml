@@ -6,6 +6,11 @@ Description: 'coffee-sam
 Globals:
   Function:
     Timeout: 3
+  Api:
+    Cors:
+      AllowMethods: "'*'"
+      AllowHeaders: "'*'"
+      AllowOrigin: "'*'"
 Resources:
   GetShopsFunction:
     Type: AWS::Serverless::Function
