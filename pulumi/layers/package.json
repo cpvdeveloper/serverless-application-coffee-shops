@@ -1,0 +1,24 @@
+{
+  "name": "pulumi-coffee",
+  "description": "AWS serverless application build using Pulumi",
+  "license": "MIT",
+  "main": "index.ts",
+  "scripts": {
+    "build": "rm -rf build && tsc"
+  },
+  "devDependencies": {
+    "@pulumi/aws": "^4.0.0",
+    "@pulumi/awsx": "^0.30.0",
+    "@pulumi/pulumi": "^3.0.0",
+    "@types/aws-lambda": "^8.10.76",
+    "@types/node": "^10.0.0",
+    "@types/uuid": "^8.3.0",
+    "prettier": "^2.2.1",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.903.0",
+    "axios": "^0.21.1",
+    "uuid": "^8.3.2"
+  }
+}
